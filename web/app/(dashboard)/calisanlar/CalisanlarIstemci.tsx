@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { yetkiGetir, yetkiGuncelle, VARSAYILAN_FOREMAN, VARSAYILAN_WORKER, type Permissions } from '@/app/actions/yetkiler'
+import { yetkiGetir, yetkiGuncelle } from '@/app/actions/yetkiler'
+import { VARSAYILAN_FOREMAN, VARSAYILAN_WORKER, type Permissions } from '@/lib/yetkiler-types'
 
 type Calisan = {
   id: string
@@ -100,13 +101,14 @@ export default function CalisanlarIstemci({ calisanlar }: { calisanlar: Calisan[
     setSeciliCalisan(calisan)
     setYukleniyor(true)
     setBasarili(false)
-    const mevcut = await yetkiGetir(calisan.id)
-    if (mevcut) {
-      setPermissions(mevcut)
-    } else {
+    try {
+      const mevcut = await yetkiGetir(calisan.id)
+      setPermissions(mevcut ?? (calisan.role === 'foreman' ? { ...VARSAYILAN_FOREMAN } : { ...VARSAYILAN_WORKER }))
+    } catch {
       setPermissions(calisan.role === 'foreman' ? { ...VARSAYILAN_FOREMAN } : { ...VARSAYILAN_WORKER })
+    } finally {
+      setYukleniyor(false)
     }
-    setYukleniyor(false)
   }
 
   function kapat() {
