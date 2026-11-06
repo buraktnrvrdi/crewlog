@@ -92,8 +92,13 @@ export default function DavetEkrani({ onGeri }: { onGeri: () => void }) {
     setOlusturuluyor(true)
 
     let kod = kodUret()
-    const { data: mevcut } = await supabase.from('invitations').select('id').eq('code', kod).single()
-    if (mevcut) kod = kodUret()
+    let deneme = 0
+    while (deneme < 5) {
+      const { data: mevcut } = await supabase.from('invitations').select('id').eq('code', kod).single()
+      if (!mevcut) break
+      kod = kodUret()
+      deneme++
+    }
 
     const expires = new Date()
     expires.setDate(expires.getDate() + 7)
@@ -105,6 +110,7 @@ export default function DavetEkrani({ onGeri }: { onGeri: () => void }) {
       created_by: userId,
       expires_at: expires.toISOString(),
       worker_id: seciliRol === 'worker' ? seciliIsci : null,
+      max_uses: seciliRol === 'worker' ? 1 : 20,
     }).select().single()
 
     if (error) {
@@ -132,7 +138,7 @@ export default function DavetEkrani({ onGeri }: { onGeri: () => void }) {
       { text: 'Vazgec', style: 'cancel' },
       {
         text: 'Sil', style: 'destructive', onPress: async () => {
-          await supabase.from('invitations').delete().eq('id', id)
+          await supabase.from('invitations').delete().eq('id', id).eq('company_id', companyId!)
           setDavetler(prev => prev.filter(d => d.id !== id))
         }
       }

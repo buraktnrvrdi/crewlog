@@ -17,7 +17,7 @@ CREATE TABLE profiles (
   company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
   full_name  TEXT NOT NULL,
   phone      TEXT,
-  role       TEXT CHECK (role IN ('owner', 'manager', 'foreman', 'accountant')) DEFAULT 'manager',
+  role       TEXT CHECK (role IN ('owner', 'admin', 'foreman', 'worker')) DEFAULT 'worker',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -60,8 +60,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const company = profile.companies as unknown as { name: string }
   const bildirimler = await getBildirimler(profile.company_id)
-  const isAdmin = profile.role === 'admin' || !profile.role
-  const rolLabel = isAdmin ? 'Yönetici' : 'Şef'
+  const isAdmin = !profile.role || ['owner', 'admin'].includes(profile.role)
+  const rolLabel = profile.role === 'owner' ? 'Kurucu' : isAdmin ? 'Yönetici' : profile.role === 'foreman' ? 'Şef' : 'Çalışan'
   const initial = profile.full_name?.charAt(0)?.toUpperCase() ?? '?'
   const avatarId = (profile as { avatar_color?: string }).avatar_color
   const [avatarFrom, avatarTo] = avatarGradient(avatarId)
