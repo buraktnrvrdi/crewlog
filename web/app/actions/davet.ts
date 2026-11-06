@@ -115,23 +115,30 @@ export async function davetKullan(kod: string, userId: string) {
   const rolMap: Record<string, string> = { admin: 'admin', foreman: 'foreman', worker: 'worker' }
   const dbRol = rolMap[davet.role] ?? davet.role
 
-  // Profil yoksa oluştur, varsa güncelle (trigger kapalıyken kayıt olanlar için)
-  const { data: authUser } = await admin.auth.admin.getUserById(userId)
-  const fullName = authUser?.user?.user_metadata?.full_name ?? 'Kullanıcı'
+  const { data: mevcutProfilRow } = await admin.from('profiles').select('id').eq('id', userId).maybeSingle()
 
-  const { error } = await admin
-    .from('profiles')
-    .upsert({
-      id: userId,
-      full_name: fullName,
+  let profilHatasi
+  if (mevcutProfilRow) {
+    const { error } = await admin.from('profiles').update({
       company_id: davet.company_id,
       role: dbRol,
       worker_id: davet.worker_id ?? null,
-    }, { onConflict: 'id' })
+    }).eq('id', userId)
+    profilHatasi = error
+  } else {
+    const { error } = await admin.from('profiles').insert({
+      id: userId,
+      full_name: 'Kullanıcı',
+      company_id: davet.company_id,
+      role: dbRol,
+      worker_id: davet.worker_id ?? null,
+    })
+    profilHatasi = error
+  }
 
-  if (error) {
+  if (profilHatasi) {
     await admin.from('invitations').update({ use_count: davet.use_count }).eq('id', davet.id)
-    return { error: error.message }
+    return { error: profilHatasi.message }
   }
 
   return { success: true }
