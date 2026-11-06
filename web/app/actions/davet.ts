@@ -103,14 +103,14 @@ export async function davetKullan(kod: string, userId: string) {
   if (new Date(davet.expires_at) < new Date()) return { error: 'Davet kodunun süresi dolmuş' }
 
   // Atomik artırım: use_count < max_uses koşulu sağlanırsa güncelle
-  const { count } = await admin
+  const { data: updated } = await admin
     .from('invitations')
     .update({ use_count: davet.use_count + 1 })
     .eq('id', davet.id)
     .lt('use_count', davet.max_uses)
-    .select('id', { count: 'exact', head: true })
+    .select('id')
 
-  if (!count || count === 0) return { error: 'Bu davet kodu maksimum kullanım sayısına ulaştı' }
+  if (!updated || updated.length === 0) return { error: 'Bu davet kodu maksimum kullanım sayısına ulaştı' }
 
   // DB'deki rol adları: owner/admin/foreman/worker
   const rolMap: Record<string, string> = { admin: 'admin', foreman: 'foreman', worker: 'worker' }
