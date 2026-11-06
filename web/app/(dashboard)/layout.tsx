@@ -37,6 +37,7 @@ const NAV_GRUPLARI = [
   {
     baslik: 'SİSTEM',
     linkler: [
+      { href: '/calisanlar', label: 'Çalışanlar', adminOnly: true },
       { href: '/davet', label: 'Davet', adminOnly: true },
       { href: '/profil', label: 'Profil' },
     ],
