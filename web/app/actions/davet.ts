@@ -112,21 +112,24 @@ export async function davetKullan(kod: string, userId: string) {
 
   if (!updated || updated.length === 0) return { error: 'Bu davet kodu maksimum kullanım sayısına ulaştı' }
 
-  // DB'deki rol adları: owner/admin/foreman/worker
   const rolMap: Record<string, string> = { admin: 'admin', foreman: 'foreman', worker: 'worker' }
   const dbRol = rolMap[davet.role] ?? davet.role
 
+  // Profil yoksa oluştur, varsa güncelle (trigger kapalıyken kayıt olanlar için)
+  const { data: authUser } = await admin.auth.admin.getUserById(userId)
+  const fullName = authUser?.user?.user_metadata?.full_name ?? 'Kullanıcı'
+
   const { error } = await admin
     .from('profiles')
-    .update({
+    .upsert({
+      id: userId,
+      full_name: fullName,
       company_id: davet.company_id,
       role: dbRol,
       worker_id: davet.worker_id ?? null,
-    })
-    .eq('id', userId)
+    }, { onConflict: 'id' })
 
   if (error) {
-    // Profil güncellenemedi, use_count'u geri al
     await admin.from('invitations').update({ use_count: davet.use_count }).eq('id', davet.id)
     return { error: error.message }
   }
