@@ -24,14 +24,6 @@ Kimlik doğrulama, veritabanı ve dosya depolama için [Supabase](https://supaba
 - **Davet sistemi:** Çalışanları davet kodu ile şirkete katma.
 - **Bildirimler:** Panelde bildirim zili, mobilde push bildirimleri.
 
-## Ekran görüntüleri
-
-Panelin iç sayfaları oturum ve Supabase verisi gerektirdiği için burada herkese açık giriş ekranları gösterilmektedir.
-
-| Giriş | Kayıt |
-| --- | --- |
-| ![Giriş ekranı](docs/ekran-goruntuleri/01-giris.webp) | ![Kayıt ekranı](docs/ekran-goruntuleri/02-kayit.webp) |
-
 ## Gereksinimler
 
 - Node.js 20 veya üzeri ve npm
